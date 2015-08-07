@@ -3,12 +3,39 @@ package com.beauchef.testjwt;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.joda.time.DateTime;
+
 /**
  * JWT Tests
+ * 
+ * https://tools.ietf.org/html/rfc7519
+ * 
+ * The sequence used is the one described in the RFC, so it is as following:
+ * 
+ *   - iss : issuer
+ *   - sub : subject
+ *   - aud : audience
+ *   - exp : expiration
+ *   - nbf : not before     NOT USED
+ *   - iat : issued at
+ *   - jti : id
+ *   - aut : authorities    NON-STANDARD
+ *   - ten : tenants        NON-STANDARD
+ *   - mod : modules        NON-STANDARD
  */
 public class App 
 {
+	public static final String EXPECTED_CLAIMS = "{\"iss\":\"http://www.beauchef.com/issuer\",\"sub\":\"johndoe@example.com\",\"aud\":\"http://www.beauchef.com/audience\",\"exp\":1439653500,\"iat\":1439652600,\"jti\":\"EmBq37zYDootE1f_NXg1Sw\",\"aut\":[\"authority1\",\"authority2\",\"authority3\",\"authority4\",\"authority5\"],\"ten\":[\"tenant1\",\"tenant2\",\"tenant3\"],\"mod\":[\"module1\",\"module2\",\"module3\"]}";
+	
+	public static final int HEAD = 0;
+	public static final int CLAIMS = 1;
+	public static final int SIG = 2;
+	
 	public static final int EXPIRATION_IN_MINUTES = 15;
+	public static DateTime ISSUED_TIME = new DateTime(2015, 8, 15, 11, 30);
+	public static DateTime EXPIRATION_TIME = ISSUED_TIME.plusMinutes(EXPIRATION_IN_MINUTES);
+	public static final String TEST_ID = "EmBq37zYDootE1f_NXg1Sw";
+	
     public static final int ALLOWED_SKEW_SECONDS = 30;
 	public static final long ONE_MINUTE_IN_MILLIS = 60000;
     public static final String AUTHORITIES_CLAIM = "aut";
@@ -75,11 +102,21 @@ public class App
     {
         System.out.println( "Tests of different JWT libraries" );
         System.out.println();
+        
         Jose4J jose4j = new Jose4J();
-        jose4j.run();
+        String jose4jToken = jose4j.run();
+        
         JavaJwt javaJwt = new JavaJwt();
-        javaJwt.run();
+        String javaJwtToken = javaJwt.run();
+        
         Jjwt jjwt = new Jjwt();
-        jjwt.run();
+        String jjwtToken = jjwt.run();
+        
+        Nimbus nimbus = new Nimbus();
+        String nimbusToken = nimbus.run();
+        
+        System.out.println("The jose4j and javaJwt tokens are " + ((jose4jToken.equals(javaJwtToken)) ? "" : "not ") + "equal.");
+        System.out.println("The jose4j and jjwt tokens are " + ((jose4jToken.equals(jjwtToken)) ? "" : "not ") + "equal.");
+        System.out.println("The jose4j and nimbus tokens are " + ((jose4jToken.equals(nimbusToken)) ? "" : "not ") + "equal.");
     }
 }

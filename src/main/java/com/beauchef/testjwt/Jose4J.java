@@ -6,6 +6,7 @@ import java.security.Key;
 import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.NumericDate;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.keys.HmacKey;
 import org.jose4j.lang.JoseException;
@@ -20,7 +21,7 @@ public class Jose4J
     /**
      * Test of Jose4J
      */
-    public void run() {
+    public String run() {
     	Key secretKey;
     	try {
     		secretKey = new HmacKey(App.SECRET_KEY_TEXT_256_BITS.getBytes("UTF-8"));
@@ -39,11 +40,14 @@ public class Jose4J
         // Create payload (claims) object
         final JwtClaims claims = new JwtClaims();
         claims.setIssuer(App.ISSUER);
-        claims.setAudience(App.AUDIENCE);
-        claims.setExpirationTimeMinutesInTheFuture(App.EXPIRATION_IN_MINUTES);
-        claims.setGeneratedJwtId();
-        claims.setIssuedAtToNow();
         claims.setSubject(App.SUBJECT);
+        claims.setAudience(App.AUDIENCE);
+        //claims.setExpirationTimeMinutesInTheFuture(App.EXPIRATION_IN_MINUTES);
+        claims.setExpirationTime(NumericDate.fromMilliseconds(App.EXPIRATION_TIME.getMillis()));
+        //claims.setIssuedAtToNow();
+        claims.setIssuedAt(NumericDate.fromMilliseconds(App.ISSUED_TIME.getMillis()));
+        //claims.setGeneratedJwtId();
+        claims.setJwtId(App.TEST_ID);
         claims.setStringListClaim(App.AUTHORITIES_CLAIM, App.AUTHORITIES);
         claims.setStringListClaim(App.TENANTS_CLAIM, App.TENANTS);
         claims.setStringListClaim(App.MODULES_CLAIM, App.MODULES);
@@ -62,5 +66,6 @@ public class Jose4J
             throw new IllegalArgumentException(jex.getMessage(), jex);
         }
         App.displayResults("jose.4.j", payload, jwt);
+        return jwt;
     }
 }
