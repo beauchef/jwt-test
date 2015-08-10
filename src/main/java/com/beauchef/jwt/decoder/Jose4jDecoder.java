@@ -15,11 +15,11 @@ import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.keys.HmacKey;
 
+import com.beauchef.App;
 import com.beauchef.jwt.Claim;
 import com.beauchef.jwt.Claims;
 import com.beauchef.jwt.Decoder;
 import com.beauchef.jwt.Signature;
-import com.beauchef.testjwt.App;
 
 public class Jose4jDecoder extends Decoder {
 

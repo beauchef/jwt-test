@@ -1,4 +1,4 @@
-package com.beauchef.testjwt;
+package com.beauchef;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

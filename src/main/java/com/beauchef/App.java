@@ -1,4 +1,4 @@
-package com.beauchef.testjwt;
+package com.beauchef;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,8 +46,8 @@ public class App
     public static final String TENANTS_CLAIM = "ten";
     public static final String MODULES_CLAIM = "mod";
     public static final String SUBJECT = "johndoe@example.com";
-    public static final String AUDIENCE = "http://www.beauchef.com/audience";
-    public static final String ISSUER = "http://www.beauchef.com/issuer";
+    public static final String AUDIENCE = "http://www.example.com/audience";
+    public static final String ISSUER = "http://www.example.com/issuer";
     public static final String SECRET_KEY_TEXT_256_BITS = 
     		"mysecretmysecretmysecretmysecret"; // 256 bits
     public static final String SECRET_KEY_TEXT_512_BITS = 
