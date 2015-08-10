@@ -5,10 +5,19 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 
+import com.beauchef.jwt.Claims;
+import com.beauchef.jwt.Jwt;
+import com.beauchef.jwt.Library;
+import com.beauchef.jwt.Signature;
+import com.beauchef.jwt.library.JavaJwt;
+import com.beauchef.jwt.library.Jjwt;
+import com.beauchef.jwt.library.Jose4j;
+import com.beauchef.jwt.library.Nimbus;
+
 /**
  * JWT Tests
  * 
- * https://tools.ietf.org/html/rfc7519
+ * @see <a href="https://tools.ietf.org/html/rfc7519">IETF Request for Comments: 7519</a>
  * 
  * The sequence used is the one described in the RFC, so it is as following:
  * 
@@ -25,28 +34,17 @@ import org.joda.time.DateTime;
  */
 public class App 
 {
-	public static final String EXPECTED_CLAIMS = "{\"iss\":\"http://www.beauchef.com/issuer\",\"sub\":\"johndoe@example.com\",\"aud\":\"http://www.beauchef.com/audience\",\"exp\":1439653500,\"iat\":1439652600,\"jti\":\"EmBq37zYDootE1f_NXg1Sw\",\"aut\":[\"authority1\",\"authority2\",\"authority3\",\"authority4\",\"authority5\"],\"ten\":[\"tenant1\",\"tenant2\",\"tenant3\"],\"mod\":[\"module1\",\"module2\",\"module3\"]}";
-	
-	public static final int HEAD = 0;
-	public static final int CLAIMS = 1;
-	public static final int SIG = 2;
-	
 	public static final int EXPIRATION_IN_MINUTES = 15;
 	public static DateTime ISSUED_TIME = new DateTime(2015, 8, 15, 11, 30);
 	public static DateTime EXPIRATION_TIME = ISSUED_TIME.plusMinutes(EXPIRATION_IN_MINUTES);
-	public static final String TEST_ID = "EmBq37zYDootE1f_NXg1Sw";
+	
+	public static final String ID = "EmBq37zYDootE1f_NXg1Sw";
 	
     public static final int ALLOWED_SKEW_SECONDS = 30;
-	public static final long ONE_MINUTE_IN_MILLIS = 60000;
+    
     public static final String AUTHORITIES_CLAIM = "aut";
     public static final String TENANTS_CLAIM = "ten";
     public static final String MODULES_CLAIM = "mod";
-    public static final String AUDIENCE_CLAIM = "aud";
-    public static final String ISSUER_CLAIM = "iss";
-    public static final String ISSUED_AT = "iat";
-    public static final String EXPIRY = "exp";
-    public static final String ID = "jti";
-    public static final String SUBJECT_CLAIM = "sub";
     public static final String SUBJECT = "johndoe@example.com";
     public static final String AUDIENCE = "http://www.beauchef.com/audience";
     public static final String ISSUER = "http://www.beauchef.com/issuer";
@@ -103,20 +101,42 @@ public class App
         System.out.println( "Tests of different JWT libraries" );
         System.out.println();
         
-        Jose4J jose4j = new Jose4J();
-        String jose4jToken = jose4j.run();
+        Claims claims = new Claims(ISSUER, SUBJECT, AUDIENCE, EXPIRATION_TIME.toDate(), null, ISSUED_TIME.toDate(), ID);
+        claims.add(AUTHORITIES_CLAIM, AUTHORITIES);
+        claims.add(TENANTS_CLAIM, TENANTS);
+        claims.add(MODULES_CLAIM, MODULES);
+
+        Library jjwt = new Jjwt(SECRET_KEY_TEXT_256_BITS, Signature.HS256);
+        Jwt jjwtToken = jjwt.encode(claims);
+        displayResults("JJWT", jjwtToken.getPayload(), jjwtToken.getToken());
         
-        JavaJwt javaJwt = new JavaJwt();
-        String javaJwtToken = javaJwt.run();
+        Library javaJwt = new JavaJwt(SECRET_KEY_TEXT_256_BITS, Signature.HS256);
+        Jwt javaJwtToken = javaJwt.encode(claims);
+        displayResults("Java JWT", javaJwtToken.getPayload(), javaJwtToken.getToken());
         
-        Jjwt jjwt = new Jjwt();
-        String jjwtToken = jjwt.run();
+        Library jose4j = new Jose4j(SECRET_KEY_TEXT_256_BITS, Signature.HS256);
+        Jwt jose4jToken = jose4j.encode(claims);
+        displayResults("Jose.4.j", jose4jToken.getPayload(), jose4jToken.getToken());
         
-        Nimbus nimbus = new Nimbus();
-        String nimbusToken = nimbus.run();
+        Library nimbus = new Nimbus(SECRET_KEY_TEXT_256_BITS, Signature.HS256);
+        Jwt nimbusToken = nimbus.encode(claims);
+        displayResults("Nimbus", nimbusToken.getPayload(), nimbusToken.getToken());
         
         System.out.println("The jose4j and javaJwt tokens are " + ((jose4jToken.equals(javaJwtToken)) ? "" : "not ") + "equal.");
         System.out.println("The jose4j and jjwt tokens are " + ((jose4jToken.equals(jjwtToken)) ? "" : "not ") + "equal.");
         System.out.println("The jose4j and nimbus tokens are " + ((jose4jToken.equals(nimbusToken)) ? "" : "not ") + "equal.");
+        
+        System.out.println();
+        
+        Claims jjwtClaims = jose4j.decode(jjwtToken.getToken());
+        Claims javaJwtClaims = jose4j.decode(javaJwtToken.getToken());
+        Claims jose4jClaims = jose4j.decode(jose4jToken.getToken());
+        Claims nimbusClaims = jose4j.decode(nimbusToken.getToken());
+        
+        System.out.println("*** Decoding by Jose4J");
+        System.out.println("JJWT claims:      " + jjwtClaims);
+        System.out.println("Java JWT claims:  " + javaJwtClaims);
+        System.out.println("Jose4J claims:    " + jose4jClaims);
+        System.out.println("Nimbus claims:    " + nimbusClaims);
     }
 }
